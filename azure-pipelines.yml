@@ -5,9 +5,9 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  - group: Artifactory-Secrets
+  - group: Artifactory-npm-Secrets
   - name: buildName
-    value: node-app
+    value: node-npm-app
   - name: buildNumber
     value: $(Build.BuildNumber)
 
@@ -17,6 +17,7 @@ steps:
     versionSpec: '20.x'
   displayName: 'Install Node.js'
 
+# Install dependencies and build
 - script: |
     npm ci
     npm run build --if-present
@@ -36,14 +37,21 @@ steps:
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
-# Upload build artifacts (example: dist folder)
+# Configure npm to use Artifactory repo
 - script: |
-    jfrog rt upload "dist/*" node-builds/$(buildName)/$(buildNumber)/ \
+    jfrog rt npm-config \
+      --repo-resolve=$(NPM_REPO) \
+      --repo-deploy=$(NPM_REPO)
+  displayName: 'Configure npm for Artifactory'
+
+# Publish npm package to specific repo
+- script: |
+    jfrog rt npm-publish \
       --build-name=$(buildName) \
       --build-number=$(buildNumber)
-  displayName: 'Upload Artifacts to Artifactory'
+  displayName: 'Publish Package to npm-local'
 
-# Publish Build Info (recommended)
+# Publish build info (recommended)
 - script: |
     jfrog rt build-publish $(buildName) $(buildNumber)
   displayName: 'Publish Build Info'
