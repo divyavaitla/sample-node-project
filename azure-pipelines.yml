@@ -1,13 +1,15 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
 - master
 
 pool:
   vmImage: ubuntu-latest
+
+variables:
+  - group: Artifactory-Secrets
+  - name: buildName
+    value: node-app
+  - name: buildNumber
+    value: $(Build.BuildNumber)
 
 steps:
 - task: NodeTool@0
@@ -16,5 +18,32 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    npm install
-  displayName: 'npm install and build'
+    npm ci
+    npm run build --if-present
+  displayName: 'Install & Build'
+
+# Install JFrog CLI
+- script: |
+    curl -fL https://install-cli.jfrog.io | sh
+    sudo mv jfrog /usr/local/bin/jfrog
+  displayName: 'Install JFrog CLI'
+
+# Configure JFrog CLI
+- script: |
+    jfrog config add artifactory-server \
+      --url=$(JF_URL) \
+      --access-token=$(JF_ACCESS_TOKEN) \
+      --interactive=false
+  displayName: 'Configure JFrog CLI'
+
+# Upload build artifacts (example: dist folder)
+- script: |
+    jfrog rt upload "dist/*" node-builds/$(buildName)/$(buildNumber)/ \
+      --build-name=$(buildName) \
+      --build-number=$(buildNumber)
+  displayName: 'Upload Artifacts to Artifactory'
+
+# Publish Build Info (recommended)
+- script: |
+    jfrog rt build-publish $(buildName) $(buildNumber)
+  displayName: 'Publish Build Info'
