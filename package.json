@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "build": "echo 'No build step required'"
   },
   "author": "Adem Cemil YALCIN",
   "license": "ISC",
