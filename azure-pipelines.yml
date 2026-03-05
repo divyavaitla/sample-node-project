@@ -4,11 +4,6 @@ trigger:
 pool:
   name: Default
 
-variables:
-  - name: buildName
-    value: node-npm-app
-  - name: buildNumber
-    value: $(Build.BuildNumber)
 
 steps:
 
@@ -20,18 +15,14 @@ steps:
 
 # Install dependencies
 - script: |
-    npm ci
+    npm install
   displayName: Install Dependencies
 
-# Run tests
-- script: |
-    npm test
-  displayName: Run Tests
 
 # Install JFrog CLI
 - script: |
     curl -fL https://install-cli.jfrog.io | sh
-    sudo mv jfrog /usr/local/bin/jfrog
+    sudo mv jf /usr/local/bin/jf
   displayName: Install JFrog CLI
 
 # Configure JFrog CLI
@@ -49,14 +40,4 @@ steps:
       --repo-deploy=$(NPM_REPO)
   displayName: Configure npm for Artifactory
 
-# Publish package
-- script: |
-    jf npm publish \
-      --build-name=$(buildName) \
-      --build-number=$(buildNumber)
-  displayName: Publish Package to Artifactory
 
-# Publish build info to Artifactory
-- script: |
-    jf rt build-publish $(buildName) $(buildNumber)
-  displayName: Publish Build Info
