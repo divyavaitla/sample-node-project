@@ -12,42 +12,38 @@ variables:
     value: $(Build.BuildNumber)
 
 steps:
+
 - task: NodeTool@0
   inputs:
     versionSpec: '20.x'
-  displayName: 'Install Node.js'
+  displayName: Install Node.js
 
-# Install dependencies and build
-- script: |
-    npm ci
-    npm run build --if-present
-  displayName: 'Install & Build'
+- script: npm ci
+  displayName: Install Dependencies
 
-# Install JFrog CLI
+- script: npm run build --if-present
+  displayName: Build Application
+
 - script: |
     curl -fL https://install-cli.jfrog.io | sh
     sudo mv jfrog /usr/local/bin/jfrog
-  displayName: 'Install JFrog CLI'
+  displayName: Install JFrog CLI
 
-# Configure JFrog CLI
 - script: |
     jfrog config add artifactory-server \
       --url=$(JF_URL) \
       --access-token=$(JF_ACCESS_TOKEN) \
       --interactive=false
-  displayName: 'Configure JFrog CLI'
+  displayName: Configure JFrog CLI
 
-# Configure npm to use Artifactory repo
 - script: |
     jfrog rt npm-config \
       --repo-resolve=$(NPM_REPO) \
       --repo-deploy=$(NPM_REPO)
-  displayName: 'Configure npm for Artifactory'
+  displayName: Configure npm for Artifactory
 
-# Publish npm package to specific repo
 - script: |
     jfrog rt npm-publish \
       --build-name=$(buildName) \
       --build-number=$(buildNumber)
-  displayName: 'Publish Package to npm-local'
-
+  displayName: Publish Package
