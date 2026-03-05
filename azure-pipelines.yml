@@ -30,20 +30,20 @@ steps:
   displayName: Install JFrog CLI
 
 - script: |
-    jfrog config add artifactory-server \
+    jf c add artifactory-server \
       --url=$(JF_URL) \
       --access-token=$(JF_ACCESS_TOKEN) \
       --interactive=false
   displayName: Configure JFrog CLI
 
 - script: |
-    jfrog rt npm-config \
+    jf rt npmc \
       --repo-resolve=$(NPM_REPO) \
       --repo-deploy=$(NPM_REPO)
   displayName: Configure npm for Artifactory
 
 - script: |
-    jfrog rt npm-publish \
+    jf rt npm-publish \
       --build-name=$(buildName) \
       --build-number=$(buildNumber)
   displayName: Publish Package
