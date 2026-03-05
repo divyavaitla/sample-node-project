@@ -51,7 +51,3 @@ steps:
       --build-number=$(buildNumber)
   displayName: 'Publish Package to npm-local'
 
-# Publish build info (recommended)
-- script: |
-    jfrog rt build-publish $(buildName) $(buildNumber)
-  displayName: 'Publish Build Info'
